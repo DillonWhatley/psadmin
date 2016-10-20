@@ -13,38 +13,38 @@ var ManageAuthorPage = React.createClass({
     ],
 
     statics: {
-        willTransitionFrom: function(transition, component) {
+        willTransitionFrom: function (transition, component) {
             if (component.state.dirty && !confirm('Leave without saving?')) {
                 transition.abort();
             }
         }
     },
 
-    getInitialState: function() {
+    getInitialState: function () {
         return {
-            author: { id: '', firstName: '', lastName: ''},
+            author: { id: '', firstName: '', lastName: '' },
             errors: {},
             dirty: false
-        };        
+        };
     },
 
-    componentWillMount: function() {
+    componentWillMount: function () {
         var authorId = this.props.params.id; //from the path '/author:id'
 
         if (authorId) {
-            this.setState({author: AuthorStore.getAuthorById(authorId)});
+            this.setState({ author: AuthorStore.getAuthorById(authorId) });
         }
     },
 
-    setAuthorState: function(event) {
-        this.setState({dirty: true});
+    setAuthorState: function (event) {
+        this.setState({ dirty: true });
         var field = event.target.name;
         var value = event.target.value;
         this.state.author[field] = value;
-        return this.setState({author: this.state.author});
+        return this.setState({ author: this.state.author });
     },
 
-    authorFormIsValid: function() {
+    authorFormIsValid: function () {
         var formIsValid = true;
         this.state.errors = {};
 
@@ -58,31 +58,35 @@ var ManageAuthorPage = React.createClass({
             formIsValid = false;
         }
 
-        this.setState({errors: this.state.errors});
+        this.setState({ errors: this.state.errors });
         return formIsValid;
     },
 
-    saveAuthor: function(event) {
+    saveAuthor: function (event) {
         event.preventDefault();
 
-        if(!this.authorFormIsValid()){
+        if (!this.authorFormIsValid()) {
             return;
         }
-
-        AuthorActions.createAuthor(this.state.author);
-        this.setState({dirty: false});
+        if (this.state.author.id) {
+            AuthorActions.updateAuthor(this.state.author);
+        }
+        else {
+            AuthorActions.createAuthor(this.state.author);
+        }
+        this.setState({ dirty: false });
         toastr.success('Author saved.');
         this.transitionTo('authors');
     },
 
-    render: function() {
-        return (            
+    render: function () {
+        return (
             <AuthorForm
                 author={this.state.author}
                 onChange={this.setAuthorState}
                 onSave={this.saveAuthor}
                 errors={this.state.errors}
-             />           
+                />
         );
     }
 });
